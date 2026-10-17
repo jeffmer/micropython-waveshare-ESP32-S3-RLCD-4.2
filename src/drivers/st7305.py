@@ -96,35 +96,64 @@ class ST7305(graphics.Graphics):
             (0x20, []), # Display inversion off
             (0xBB, [0x4F]), # Clear controller RAM
             100, # delay 100ms
-        ]
-        
+        ]       
         for command in commands:
             if isinstance(command, tuple):
                 self._send(command[0], command[1])
             else:
                 time.sleep_ms(command)
-    
+
     @micropython.viper
-    def _convert(self):
+    def _convert_chunk(self, xs: int, xe: int, ys: int, ye: int):
+        # xs - start horizontal pixel (0..399)
+        # xe - last horizontal pixel (0..399)
+        # ys - start vertical pixel (0..299)
+        # ye - last vertical pixel (0..299)
+        if xs < 0:
+            xs = 0
+        if xe > 399:
+            xe = 399
+        if ys < 0:
+            ys = 0
+        if ye > 299:
+            ye = 299
+        if xs > xe or ys > ye:
+            return
+
+        # Align horizontal coordinates to 8-pixel boundaries (within 0..400)
+        x_start = xs & ~7
+        x_end = (xe + 8) & ~7
+        if x_end > 400:
+            x_end = 400
+
+        # In ST7305 native mapping:
+        # column = 299 - y0, stepping by 4 pixels downwards in y.
+        # Aligning to 8-pixel boundaries ensures column aligns to 8 pixels.
+        # col_start corresponds to ye (the largest y):
+        col_start = (299 - ye) & ~7
+        # col_end corresponds to ys (the smallest y):
+        col_end = ((299 - ys) & ~7) + 8
+        if col_end > 300:
+            col_end = 300
+
         s = ptr8(self.bs)
         t = ptr8(self.bt)
         lut = ptr8(self.interleave)
-        k = 0
-        for row in range(0, 400, 8):
-            for subrow in range(0, 8, 2):
-                x0 = row + subrow
-                x1 = x0 + 1
-                for column in range(0, 300, 4):
-                    y0 = 299 - column
-                    page = (y0 >> 3) * 400
-                    shift = (y0 & 7) - 3
-                    first_nibble = (s[page + x0] >> shift) & 0x0F
-                    second_nibble = (s[page + x1] >> shift) & 0x0F
-                    t[k] = lut[(first_nibble << 4) | second_nibble]
-                    k += 1
-    
+
+        for x0 in range(x_start, x_end, 2):
+            x1 = x0 + 1
+            k_base = (x0 >> 1) * 75
+            for column in range(col_start, col_end, 4):
+                y0 = 299 - column
+                page = (y0 >> 3) * 400
+                shift = (y0 & 7) - 3
+                first_nibble = (s[page + x0] >> shift) & 0x0F
+                second_nibble = (s[page + x1] >> shift) & 0x0F
+                t[k_base + (column >> 2)] = lut[(first_nibble << 4) | second_nibble]
+
     def show(self):
-        self._convert()
+        xs,xe,ys,ye = self.getMod()
+        self._convert_chunk(xs,xe,ys,ye)
         self._send(0x2A, self.caset)
         self._send(0x2B, self.raset)
         self._send(0x2C, self.bt)
