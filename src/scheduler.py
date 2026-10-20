@@ -41,7 +41,7 @@ class Scheduler:
         self.queue = []
         self.next = None
         self.nextdelay = 0
-        self.lightsleep = False
+        self.lightsleep = True
 
     def _insert(self, e):
         i = 0

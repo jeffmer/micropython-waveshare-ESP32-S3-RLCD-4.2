@@ -25,20 +25,13 @@ months = [
     "Dec",
 ]
 
-bm = BatteryMeter(g, getBatPercent, 100,50)
+bm = BatteryMeter(g, getBatPercent, 350,10)
 
 def drawcolon(x,y):
     g.fill_rect(x,y,8,8, WHITE)
     g.fill_rect(x,y+25,8,8, WHITE)
-    
-cycle = 0
 
 def drawTime():
-    global cycle
-    cycle += 1
-    if cycle >= 30:
-        cycle = 0
-        set_local_time()
     g.fill_rect(0,25,g.width,g.height-25,BLACK)
     t = rtc.datetime()
     Y = 100
@@ -49,7 +42,7 @@ def drawTime():
     g.text("{:02}".format(t[5]), X+130, Y, WHITE)
     g.setfont(roboto36)
     g.setfontalign(0, -1)
-    g.text("{}   {:02} {} {:02}".format(days[t[3]],t[1],months[t[1] - 1],t[0]),g.width//2,Y+100,WHITE)
+    g.text("{}   {:02} {} {:02}".format(days[t[3]],t[2],months[t[1] - 1],t[0]),g.width//2,Y+100,WHITE)
     bm.update(False)
     g.show()
   
@@ -59,13 +52,11 @@ def app_init():
     global ticker, cycle
     g.fill(BLACK)
     drawTime()
-    sched.set_lightsleep(True)
     ticker = sched.setInterval(20000, drawTime)
 
 
 def app_end():
     global ticker
-    sched.set_lightsleep(False)
     if not ticker is None:
         sched.clearInterval(ticker)
         ticker = None

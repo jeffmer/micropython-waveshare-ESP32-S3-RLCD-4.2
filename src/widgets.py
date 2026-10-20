@@ -1,7 +1,7 @@
 import time
 from micropython import const
 from graphics import WHITE,BLACK
-from fonts import roboto18, roboto24, roboto36
+from fonts import roboto18, roboto24, roboto36, glcdfont
 import math
 
 
@@ -43,5 +43,20 @@ class BatteryMeter:
             self.g.show()
 
 
+class smallClock:
+    
+    def __init__(self,g,x,y):
+        self.g = g
+        self.x = x
+        self.y = y
+
+    def update(self, now = True):
+        self.g.fill_rect(self.x, self.y, 36, 14, BLACK)
+        self.g.setfont(glcdfont)
+        self.g.setfontalign(0,0)
+        t = time.gmtime()
+        self.g.text("{:02}:{:02}".format(t[3],t[4]),self.x+18, self.y+7,WHITE)        
+        if now:
+            self.g.show()
 
 

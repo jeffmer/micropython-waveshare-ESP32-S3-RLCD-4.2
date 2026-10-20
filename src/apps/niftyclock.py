@@ -47,7 +47,7 @@ def drawTime():
     g.text("{:02}".format(t[6]), X+260, Y, WHITE)
     g.setfont(roboto36)
     g.setfontalign(0, -1)
-    g.text("{}   {:02} {} {:02}".format(days[t[3]],t[1],months[t[1] - 1],t[0]),g.width//2,Y+100,WHITE)
+    g.text("{}   {:02} {} {:02}".format(days[t[3]],t[2],months[t[1] - 1],t[0]),g.width//2,Y+100,WHITE)
     cycle+=1
     if cycle >=9:
         cycle=0

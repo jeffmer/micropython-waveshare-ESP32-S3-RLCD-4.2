@@ -19,10 +19,11 @@ class PCF85063(Event):
         self.i2c = i2c
         self.rtcp = rtcp
         self.bytebuf = bytearray(1)
+        self.wr_b(0,0) # make sure clock is started
         if self.rtcp is not None:
             self.rtcp.irq(self.isr, Pin.IRQ_FALLING)
         self.clear_alarm()
-        self.enable_interrupt(True)
+        self.enable_interrupt(False)
 
     def wr_b(self, reg, val):
         self.bytebuf[0] = val

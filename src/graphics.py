@@ -138,9 +138,10 @@ class Graphics(framebuf.FrameBuffer):
             pos += char_w
         fb = framebuf.FrameBuffer(buf, str_w, str_h, framebuf.MONO_VLSB)
         palette = self.palette
-        palette.bg(self.bgcolor)
+        nc = (c+1)%2 if c is not None else self.bgcolor
+        palette.bg(nc)
         palette.fg(c if c is not None else self.fgcolor)
-        self.blit(fb, x, y,self.bgcolor,palette) 
+        self.blit(fb, x, y,nc,palette) 
         self.updateMod(x, y, x + str_w - 1, y + str_h - 1)
         return str_w
 
@@ -155,7 +156,7 @@ class Graphics(framebuf.FrameBuffer):
             words = line.split(" ")
             for word in words:
                 ww = self._font.get_width(word)
-                if curx + ww >= w:
+                if curx + ww >= w + x:
                     curx = x
                     cury += char_h
                     while ww > w:
@@ -164,6 +165,7 @@ class Graphics(framebuf.FrameBuffer):
                         cury += char_h
                 if len(word) > 0:
                     curx += self.text(word + " ", curx, cury, c)
+                    
             curx = x
             cury += char_h
 

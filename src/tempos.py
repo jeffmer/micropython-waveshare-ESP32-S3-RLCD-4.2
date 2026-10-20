@@ -57,6 +57,9 @@ def getBatPercent():
 
 sched = Scheduler()
 
+# to deal with clock drift during lightsleep
+sched.setInterval(600000,set_local_time) 
+
 
 
 

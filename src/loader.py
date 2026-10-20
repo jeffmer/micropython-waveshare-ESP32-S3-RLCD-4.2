@@ -1,8 +1,9 @@
 from micropython import const
+from config import POWER_SAVE
 from time import ticks_ms, ticks_diff, sleep
 from widgets import Label
-import wifi
 from tempos import sched, do_ntp_sync, key, g
+import wifi
 from fonts import roboto18,roboto36
 import os
 
@@ -97,8 +98,9 @@ g.show()
 
 status = Label(g,20, 260, 160, 40, roboto18, 1)
 progress = Label(g,200, 260, 40, 40, roboto18, 1)
-
+wifi.setScheduler(sched)
 wifi.do_connected_action(do_ntp_sync,status,progress)   
 appRing.begin()
+sched.set_lightsleep(POWER_SAVE)
 sched.run()
  

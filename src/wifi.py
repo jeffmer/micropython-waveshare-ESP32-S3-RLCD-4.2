@@ -2,16 +2,21 @@ from time import sleep_ms
 import network
 from config import SSID,PWD
 
+
 _wlan = network.WLAN(network.STA_IF)
 _lazyTO = None
 
+sched = None
+def setScheduler(s):
+     global sched
+     sched = s
 
 def connect(status=None, progress=None):
     global _lazyTO
     "Connect wlan to the configured network. Returns True on success."
     if _wlan.isconnected():
         if not _lazyTO is None:
-#             sched.clearTimeout(_lazyTO)
+            sched.clearTimeout(_lazyTO)
             _lazyTO = None
         return True
     output = status.update if status else print
@@ -43,7 +48,7 @@ def disconnect():
 
 def lazy_disconnect():
     global _lazyTO
-#     _lazyTO = sched.setTimeout(5000,disconnect)
+    _lazyTO = sched.setTimeout(5000,disconnect)
 
 
 def do_connected(action, status=None, progress=None):

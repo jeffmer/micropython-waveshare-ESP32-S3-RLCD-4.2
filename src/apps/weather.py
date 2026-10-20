@@ -1,9 +1,9 @@
-from tempos import g,sched
-from fonts import roboto18, roboto24, roboto36
+from tempos import g,sched, getBatPercent
+from fonts import roboto18, roboto24, roboto36, glcdfont
 import time
 import png
-from widgets import Label
-from wifi import do_connected_action
+from widgets import Label, BatteryMeter, smallClock
+from wifi import connect, lazy_disconnect
 import json
 from requests import request
 from config import OWP_KEY, LATITUDE, LONGTITUDE,summertime
@@ -12,11 +12,14 @@ from micropython import const
 BLACK = const(0)
 WHITE = const(1)
 
-WX = const(205)
-WY = (6)
+WX = const(0)
+WY = const(25)
 
-status = Label(g, 0, 260, 100, 30, roboto18, WHITE)
-progress = Label(g, 110, 260, 30, 30, roboto18, WHITE)
+status = Label(g, 0, 280, 100, 30, roboto18, WHITE)
+progress = Label(g, 110, 280, 30, 30, roboto18, WHITE)
+
+bm = BatteryMeter(g, getBatPercent, 350,10)
+sc = smallClock(g,15,10)
 
 display = {
     "place": "xxx,CC",
@@ -31,6 +34,7 @@ display = {
 }
 
 displayicon = png.getPNG("images/weather/unknown.png")
+smallicon = png.getPNG("images/weather36/unknown.png")
 
 
 def deg_to_dir(d):
@@ -74,24 +78,24 @@ def centre_text(str, font, x, y, c):
 
 def drawDisplay():
     global WX,WY
-    CX = WX + (g.width - WX)//2
-    g.fill_rect(WX, 0, g.width-WX, g.height, BLACK)
-    png.drawPNG(g,displayicon, CX-48, WY+30)
-    centre_text(display["place"], roboto24, CX, WY+9, WHITE)   
-    centre_text(display["desc"], roboto18, CX, WY+125, WHITE)
-    xoffset = CX-48
-    wy = WY+90
+    g.fill(BLACK)
+    png.drawPNG(g,displayicon, WX+48, WY+40)
+    place = display["place"].split(",")[0]
+    centre_text(place, roboto36, WX+100, WY+9, WHITE)   
+    centre_text(display["desc"], roboto18, WX+100, WY+139, WHITE)
     g.setfontalign(-1, -1)
+    xoffset = WX+240
+    wy = WY+9
     g.setfont(roboto36)
-    g.text(display["temp"], xoffset, wy+60, WHITE)
+    g.text(display["temp"], xoffset, wy, WHITE)
     g.setfont(roboto18)
-    g.text(display["humid"], xoffset, wy+95, WHITE)
-    g.text(display["press"], xoffset, wy+115, WHITE)
-    g.text(display["wind"], xoffset, wy+135, WHITE)
-    g.text(display["rise"], xoffset, wy+160, WHITE)
-    g.text(display["set"], xoffset, wy+180, WHITE)
-    g.show()
-
+    g.text(display["humid"], xoffset, wy+45, WHITE)
+    g.text(display["press"], xoffset, wy+65, WHITE)
+    g.text(display["wind"], xoffset, wy+85, WHITE)
+    g.text(display["rise"], xoffset, wy+110, WHITE)
+    g.text(display["set"], xoffset, wy+130, WHITE)
+    g.fill_rect(200,WY+14,3,140,WHITE)
+    g.fill_rect(20,195,360,3,WHITE)
 
 def getupdate():
     loc = (LATITUDE, LONGTITUDE)
@@ -104,7 +108,6 @@ def getupdate():
     if dd["cod"] == 200:
         try:
             updateDisplay(dd)
-            drawDisplay()
         except Exception as err:
             status.update("{}:{}".format(dd["cod"], str(err)))
     else:
@@ -116,16 +119,100 @@ def get_weather():
     do_connected_action(getupdate, status, progress)
 
 
+class Forecast:
+    def __init__(self,x,y):
+        self.x = x
+        self.y = y 
+        self.dt = ("00:00")
+        self.temp = ("00C")
+        self.icon = smallicon
+        self.name = "unknown"
+        self.desc = "weather description"
 
+    def update(self,dt,temp,icon,desc):
+        d = time.gmtime(dt - 946684800 + 3600 if summertime else 0)
+        self.dt = "{:02}:{:02}".format(d[3],d[4])
+        self.temp = "{}C".format(round(temp - 273))
+        if not (self.name == icon):
+            self.name = icon
+            self.icon = png.getPNG("images/weather36/" + self.name + ".png")
+        self.desc = desc
+      
+    def draw(self):
+        x = self.x
+        y = self.y
+        g.fill_rect(x,y,100,80,BLACK)
+        g.setfontalign(-1,-1)
+        g.setfont(roboto18)
+        g.text(self.dt,x+5,y+5,WHITE)
+        png.drawPNG(g,self.icon, x+5, y+20)
+        g.text(self.temp,x+45,y+30)
+        g.setfont(glcdfont)
+        g.wordwraptext(self.desc,x+10,y+55,80,WHITE)
+
+forecasts = []
+for i in range(0,5):   
+    forecasts.append(Forecast(i*80,205))
+
+def updateForecast(dd):
+    for i in range(0,5):
+        forecasts[i].update(dd["list"][i]["dt"],
+                            dd["list"][i]["main"]["temp"],
+                            dd["list"][i]["weather"][0]["icon"],
+                            dd["list"][i]["weather"][0]["description"],
+                            )
+
+def getForecast():
+    global status
+    loc = (LATITUDE, LONGTITUDE)
+    url = "https://api.openweathermap.org/data/2.5/forecast?lat={:.3f}&lon={:.3f}&appid={}&cnt=5".format(
+        loc[0], loc[1], OWP_KEY
+    )
+    r = request("GET", url)
+    dd = r.json()
+    try:
+        updateForecast(dd)
+    except Exception as err:
+        status.update("{}:{}".format(dd["cod"], str(err)))
+
+
+
+def drawAll():
+    drawDisplay()
+    for f in forecasts:
+        f.draw()
+    bm.update(False)
+    sc.update(False)
+    g.show()
+    
+def updateAll():
+    connect(status,progress)
+    getupdate()
+    getForecast()
+    lazy_disconnect()
+    status.update("   ",False)
+    
+cycle = 0
+def updateDraw():
+    global cycle
+    cycle += 1
+    if cycle >= 30:
+        print("updating")
+        updateAll()
+        drawAll()
+        cycle = 0
+    else:
+        sc.update(True)
+    
 update = None
 
-
 def app_init():
+    drawAll()
+    updateAll()
+    drawAll()
     global update
-    g.fill_rect((g.width//2)-1,5,3,g.height-10,WHITE)
-    drawDisplay()
     getupdate()
-    update = sched.setInterval(600000,getupdate)
+    update = sched.setInterval(20000,updateDraw)
 
 
 def app_end():
@@ -134,3 +221,7 @@ def app_end():
         sched.clearInterval(update)
         update = None
     g.fill(BLACK)
+
+
+
+
