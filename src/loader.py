@@ -69,38 +69,27 @@ class Ring:
         except:
             return -1
 
-_APP_LOCK = False
-
-
-def setapplock(b):
-    global _APP_LOCK
-    _APP_LOCK = b
+    def setCurrent(self,i):
+        if len(self.ring) == 0 or i<0 or i>=len(self.ring):
+            return
+        else:
+            self.curr = i
 
 import apps
 
 appRing = Ring(apps)
-
-def _move(inc):
-    global  appRing, _APP_LOCK
-    if _APP_LOCK:
-        return
-    appRing.switch(1)
-        
-
-key.addListener(_move)
-
 
 sleep(1)
 g.setfont(roboto36)
 g.fill_rect(100,100,200,40,0)
 g.text('Setting Clock', 100, 100)
 g.show()
-
 status = Label(g,20, 260, 160, 40, roboto18, 1)
 progress = Label(g,200, 260, 40, 40, roboto18, 1)
 wifi.setScheduler(sched)
-wifi.do_connected_action(do_ntp_sync,status,progress)   
-appRing.begin()
+wifi.do_connected_action(do_ntp_sync,status,progress)  
+import finder
+finder.app_init()
 sched.set_lightsleep(POWER_SAVE)
 sched.run()
  
