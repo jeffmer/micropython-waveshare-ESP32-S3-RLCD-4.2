@@ -16,7 +16,7 @@ WHITE = const(0)
 for n in names:
     icons.append(png.getPNG("images/icons/" + n + ".png"))
 
-selected = 1
+selected = -1
 in_app = False
 
 def draw():
@@ -26,7 +26,7 @@ def draw():
     g.fill_rect(0,50,400,200,WHITE)
     g.setfont(roboto36)
     g.setfontalign(0,-1)
-    g.text("InfoGlance",200,55)
+    g.text("Desk Clock",200,55,BLACK)
     g.setfont(roboto18)
     for i in range(0,len(names)):
         png.drawPNG(g,icons[i], x+14, y)

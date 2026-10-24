@@ -148,7 +148,7 @@ class Forecast:
         png.drawPNG(g,self.icon, x+5, y+20)
         g.text(self.temp,x+45,y+30)
         g.setfont(glcdfont)
-        g.wordwraptext(self.desc,x+10,y+55,80,WHITE)
+        g.wordwraptext(self.desc,x+4,y+55,72,WHITE)
 
 forecasts = []
 for i in range(0,5):   
