@@ -110,7 +110,7 @@ def getupdate():
             rx = p[1] - (120+XOFFSET)
             ry = p[2] - (120+YOFFSET)
             dist = rx*rx + ry*ry                             
-            if dist < maxdist and ar[Alt]>20:
+            if dist < maxdist and not ar[Alt] is None and ar[Alt]>20:
                 ac.append(ar)
                 if dist<mindist:
                     mindist = dist

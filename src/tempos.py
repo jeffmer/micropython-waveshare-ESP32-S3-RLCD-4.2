@@ -15,7 +15,7 @@ import ntptime
 
 
 # lcd display
-te = Pin(6, Pin.OUT, value = 1)
+te = Pin(6, Pin.IN)
 cs = Pin(40, Pin.OUT, value = 1)
 dc = Pin(5, Pin.OUT, value = 1)
 rs = Pin(41, Pin.OUT, value = 1)
