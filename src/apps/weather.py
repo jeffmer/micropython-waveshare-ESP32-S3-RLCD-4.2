@@ -15,6 +15,8 @@ WHITE = const(1)
 WX = const(0)
 WY = const(25)
 
+ZONE = 0
+
 status = Label(g, 0, 280, 100, 30, roboto18, WHITE)
 progress = Label(g, 110, 280, 30, 30, roboto18, WHITE)
 
@@ -52,7 +54,7 @@ def secs_to_time(secs, zone):
 
 
 def updateDisplay(dd):
-    global displayicon
+    global displayicon, ZONE
     display["place"] = dd["name"] + ", " + dd["sys"]["country"]
     display["desc"] = dd["weather"][0]["description"]
     if not (display["icon"] == dd["weather"][0]["icon"]):
@@ -67,6 +69,7 @@ def updateDisplay(dd):
     )
     display["rise"] = "Sunrise " + secs_to_time(dd["sys"]["sunrise"], dd["timezone"])
     display["set"] = "Sunset " + secs_to_time(dd["sys"]["sunset"], dd["timezone"])
+    ZONE = dd["timezone"]
 
 
 def centre_text(str, font, x, y, c):
@@ -130,8 +133,8 @@ class Forecast:
         self.desc = "weather description"
 
     def update(self,dt,temp,icon,desc):
-        d = time.gmtime(dt - 946684800 + 3600 if summertime else 0)
-        self.dt = "{:02}:{:02}".format(d[3],d[4])
+        global ZONE
+        self.dt = secs_to_time(dt,ZONE)
         self.temp = "{}C".format(round(temp - 273))
         if not (self.name == icon):
             self.name = icon
