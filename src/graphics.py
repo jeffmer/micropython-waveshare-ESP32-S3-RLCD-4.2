@@ -164,10 +164,10 @@ class Graphics(framebuf.FrameBuffer):
                         word = word[w // char_w :]
                         cury += char_h
                 if len(word) > 0:
-                    curx += self.text(word + " ", curx, cury, c)
-                    
+                    curx += self.text(word + " ", curx, cury, c)                   
             curx = x
             cury += char_h
+        return cury
 
     def screendump(self, name):
         with open(name + ".raw", "wb") as f:

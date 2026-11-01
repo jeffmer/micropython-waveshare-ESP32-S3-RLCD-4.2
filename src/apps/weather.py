@@ -149,7 +149,7 @@ class Forecast:
         g.setfont(roboto18)
         g.text(self.dt,x+5,y+5,WHITE)
         png.drawPNG(g,self.icon, x+5, y+20)
-        g.text(self.temp,x+45,y+30)
+        g.text(self.temp,x+45,y+30,WHITE)
         g.setfont(glcdfont)
         g.wordwraptext(self.desc,x+4,y+55,72,WHITE)
 

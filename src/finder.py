@@ -22,18 +22,21 @@ in_app = False
 def draw():
     global selected
     x = 31
-    y = 110
-    g.fill_rect(0,50,400,200,WHITE)
+    y = 80
+    g.fill_rect(0,50,400,250,WHITE)
     g.setfont(roboto36)
     g.setfontalign(0,-1)
-    g.text("Desk Clock",200,55,BLACK)
+    g.text("Desk Clock",200,25,BLACK)
     g.setfont(roboto18)
     for i in range(0,len(names)):
+        if i>=4:
+            x= 31
+            y= y+100
         png.drawPNG(g,icons[i], x+14, y)
         g.text(names[i], x+46,y+70,BLACK)
         if i == selected:
             g.rect(x+7,y-2,78,92,BLACK)
-        x+=82
+        x+=82           
     g.show()
 
 ticker = None
