@@ -61,6 +61,9 @@ The second is that  when the user button or **key** is pressed it usually has to
 This is written enirely in Micropython and takes 11ms to display a 400x300 pixel ```Framebuffer```. The driver is a subclass of a ```Graphics``` class which wraps the underlying ```Framebuffer``` primitives to allow partial updates of the screen buffer and to add some functionality such as polygon rotation, fonts and wrapped text. 
 I based the driver on the micropython ST7302 driver from the github repository at **elulis/micropython_ST7302**. 
 
+### Horizontal scrolling
+The v2 driver allows dynamic binding between frame buffers and the driver. It supports horizontal scrolling between two frame buffers and also synchronises updates of the device memory to avoid tearing using the TE ouput of the device.
+
 
 ## Installation
 
