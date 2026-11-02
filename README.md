@@ -1,6 +1,7 @@
 # micropython-waveshare-ESP32-S3-RLCD-4.2
 Micropython based software for Waveshare's ESP32-S3-RLCD-4.2. Includes micropython driver for the ST7305 based 4.2 inch reflective LCD.
 
+***Note:*** *There are now two versions of the software v1 which has immediate transitions between screens and v2 which supports smooth horizontal scrolled transitions between screens.*
 
 ![Enclosure](pictures/enclosure.jpg)
 
