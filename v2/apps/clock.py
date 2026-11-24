@@ -1,6 +1,6 @@
 from micropython import const
-from tempos import g, rtc, sched, getBatPercent, set_local_time
-from fonts import hugefont, roboto24, roboto36
+from tempos import g, rtc, sched, getBatPercent, set_local_time, shtc3
+from fonts import hugefont, roboto18, roboto24, roboto36
 from time import ticks_ms, ticks_diff
 from widgets import BatteryMeter
 import math
@@ -57,6 +57,14 @@ def drawcolon(x,y):
     g.fill_rect(x,y,8,8, WHITE)
     g.fill_rect(x,y+25,8,8, WHITE)
 
+def drawTempHumid():
+    temperature,humidity = shtc3.getReadings()
+    g.setfontalign(-1, -1)
+    g.setfont(roboto18)
+    g.text("{:.1f} C".format(temperature),10,280,WHITE)
+    g.setfontalign(1, -1)
+    g.text("{}%".format(int(humidity)),390,280,WHITE)
+
 def drawTime(b=True):
     X = 85
     g.fill(BLACK)
@@ -71,6 +79,7 @@ def drawTime(b=True):
     g.setfont(roboto24)
     g.setfontalign(0,0)
     g.text("{}   {} {:02}".format(days[t[3]], months[t[1] - 1],t[2]),200,270,WHITE)
+    drawTempHumid()
     bm.update(False)
     if b:
         g.show()

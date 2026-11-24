@@ -10,6 +10,7 @@ import wifi
 from drivers.st7305 import ST7305
 from drivers.pcf85063 import PCF85063
 from drivers.switch import Switch
+from drivers.shtc3 import SHTC3
 from widgets import Label
 import ntptime
 
@@ -55,6 +56,10 @@ adc = ADC(4)
 def getBatPercent():
     v = (adc.read_uv()/1000000)*3
     return int(((v-3.5)/0.7)*100)
+
+# set up temp/humid sensor
+
+shtc3 = SHTC3(I2C0)
 
 sched = Scheduler()
 
